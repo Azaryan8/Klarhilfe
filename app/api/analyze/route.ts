@@ -21,7 +21,7 @@ ${documentText}`;
 }
 
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: "Server misconfiguration: missing ANTHROPIC_API_KEY" }, { status: 500 });
   }
