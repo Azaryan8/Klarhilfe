@@ -20,10 +20,27 @@ Document or question:
 ${documentText}`;
 }
 
+/** HTTP headers must be Latin-1; Anthropic keys are ASCII-only. */
+function hasNonByteStringChars(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) > 255) return true;
+  }
+  return false;
+}
+
 export async function POST(req: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: "Server misconfiguration: missing ANTHROPIC_API_KEY" }, { status: 500 });
+  }
+  if (hasNonByteStringChars(apiKey)) {
+    return NextResponse.json(
+      {
+        error:
+          "ANTHROPIC_API_KEY contains invalid characters (often a Unicode ellipsis from truncated copy-paste). In Vercel, replace it with the full key from console.anthropic.com (ASCII only, no special dots).",
+      },
+      { status: 500 },
+    );
   }
 
   let body: Body;
